@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 """
 Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
+
+TODO
+Input parameter is number of rays, geometric parameters calculated automatically 
 """
 
 def plot_fin(positions, rotations, fin_origin, scale=0.5):
@@ -62,8 +65,8 @@ def plot_fin(positions, rotations, fin_origin, scale=0.5):
     ax.set_ylim(0, 1.5)
     ax.set_zlim(0, 1.5)
 
-    # Plot wireframe using position of fan origin
-    print(f'Checking each point is equal euclidian distance from fin origin')
+    # Plot wireframe by connecting joints to fin origin
+    print(f'Sanity checking each point is equal euclidian distance from fin origin:')
     for i, position in enumerate(positions):
         xyz = [[i, j] for i, j in zip(fin_origin, position)]
         x_ = xyz[0]
@@ -80,10 +83,12 @@ def plot_fin(positions, rotations, fin_origin, scale=0.5):
     # plt.show()
 
 def dh_transform(a, alpha, d, theta):
+    """
+    Standard DH transform
+    """
     ct = cos(theta); st = sin(theta)
     ca = cos(alpha); sa = sin(alpha)
 
-    # Standard DH transform
     return np.array([
         [ct, -st*ca,  st*sa, a*ct],
         [st,  ct*ca, -ct*sa, a*st],
@@ -151,23 +156,22 @@ def Tz(d):
 
 def transformation_matrix(beta, a, gamma, theta):
     """
-    Build A_i = Ry(beta) @ Rx(gamma) @ Rz(theta) @ Tx(a) @ Tz(d)
+    Build A_i = Ry(beta) @ Tx(a) @ Ry(gamma) @ Rz(theta) 
     where:
-      - beta rotates about local Y to set X direction,
-      - gamma rotates about local X to set Z axis,
-      - theta is the joint rotation about that Z,
-      - Tx(a) and Tz(d) place link endpoint.
+      - Ry(beta) rotates about local Y, by fixed ray offset beta, to set new X axis,
+      - Tx(a) is translation in new X direction by link length a,
+      - Ry(gamma) rotates about local Y, by fixed offset gamma, to set new Z axis
+      - Rz(theta) is joint rotation about new Z by joint angle theta.
+
     Returns 4x4 numpy array.
     """
     return Ry(beta) @ Tx(a) @ Ry(gamma) @ Rz(theta)
 
 def generate_transformation_params(b, a, g, inner_angle):
     """
-    Generates the paramters to describe the fin folding 
+    Generates the individual joint parameters to describe the fin folding 
     """
     outer_angle = -inner_angle/2
-
-    # return outer_angle
 
     return([(b, a, g, outer_angle),
               (b, a, g, inner_angle),
@@ -182,7 +186,7 @@ def generate_transformation_params(b, a, g, inner_angle):
 # 3D cooridinates of the origin of the fin, calculated geometrically
 fin_origin = [0.39/2, 0, 0.98]
 
-# Chord length along each fin section
+# Chord length along each fin ray
 l = 0.39
 
 # Angle of each chord, relative to previous
@@ -191,57 +195,45 @@ c = -pi/16
 # Angle of each z rotation axis, relative to previous
 g = -pi/16
 
-# --- Parameters for transformation matrix: beta, a, gamma, theta ---
-# Example: Open fan (completely flat)
-# params = [(0, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     ]
-
-# # Example: Zig-zag fold
-# params = [(0, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/4),
-#                     (c, l, g, -pi/4),
-#                     ]
-
-# # Example: Zig-zag fold
-# params = [(0, l, g, -pi/4),
-#                     (c, l, g, pi/2),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/2),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/2),
-#                     (c, l, g, -pi/4),
-#                     (c, l, g, pi/2),
-#                     ]
-
-# # Example: Fully folded fin
-# params = [(0, l, g, -pi/2),
-#                     (c, l, g, pi),
-#                     (c, l, g, -pi/2),
-#                     (c, l, g, pi),
-#                     (c, l, g, -pi/2),
-#                     (c, l, g, pi),
-#                     (c, l, g, -pi/2),
-#                     (c, l, g, pi),
-#                     ]
-
 # Iterate through a series of states from fully open fin to fully folded
-for i, angle in enumerate(np.linspace(0, pi, 10)):
+for i, angle in enumerate(np.linspace(0, pi, 1)):
 
     # Parameters for transformation matrix: beta, a, gamma, theta
     params = generate_transformation_params(c, l, g, angle)
 
+    # Example: Fully opn fin (flat)
+    params = [(0, l, g, 0),
+              (c, l, g, 0),
+              (c, l, g, 0),
+              (c, l, g, 0),
+              (c, l, g, 0),
+              (c, l, g, 0),
+              (c, l, g, 0),
+              (c, l, g, 0),
+            ]
+    
+    # Example: Partially folded fin (zig-zag) 
+    params = [(0, l, g, pi/4),
+              (c, l, g, -pi/4),
+              (c, l, g, pi/4),
+              (c, l, g, -pi/4),
+              (c, l, g, pi/4),
+              (c, l, g, -pi/4),
+              (c, l, g, pi/4),
+              (c, l, g, -pi/4),
+            ]
+
+    # Example: Fully folded fin
+    params = [(0, l, g, -pi/2),
+              (c, l, g, pi),
+              (c, l, g, -pi/2),
+              (c, l, g, pi),
+              (c, l, g, -pi/2),
+              (c, l, g, pi),
+              (c, l, g, -pi/2),
+              (c, l, g, pi),
+            ]
+    
     # 4 x 4 identity matrix
     T = np.eye(4)
 
