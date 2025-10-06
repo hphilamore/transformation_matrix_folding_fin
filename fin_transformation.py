@@ -7,10 +7,14 @@ Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
 
 TODO
-Input parameter is number of rays, geometric parameters calculated automatically 
+Fin magnitude bug 
+Update geometric parameters calculated automatically (including fold angle) when number of rays is changed
+Replace identity matrix with A0
+Double check matrix product is correct 
+Diagram to explain model using standard variable names
 """
 
-def plot_fin(positions, rotations, fin_origin, scale=0.5):
+def plot_fin(positions, rotations, fin_base, scale=0.5):
 
     """
     Plots a 3D scatter plot with folding points (joints) along the fin edge connected by a line.
@@ -21,7 +25,7 @@ def plot_fin(positions, rotations, fin_origin, scale=0.5):
     ----------
     positions : 3D position vector
     rotations: 3 x 3 orientation matrix
-    fin_origin: 3D cooridinates of the origin of the fin, calculated geometrically
+    fin_base: 3D cooridinates of the origin of the fin, calculated geometrically
     scale: scale of local coordinate axes
 
     """
@@ -66,19 +70,26 @@ def plot_fin(positions, rotations, fin_origin, scale=0.5):
     ax.set_zlim(0, 1.5)
 
     # Plot wireframe by connecting joints to fin origin
-    print(f'Sanity checking each point is equal euclidian distance from fin origin:')
+    print(f'Check each point is equal distance from fin origin and equal to hinge length l={l}:')
     for i, position in enumerate(positions):
-        xyz = [[i, j] for i, j in zip(fin_origin, position)]
+
+        # Get pairs of x, y and z coordinates to connect fin base to position 
+        xyz = [[i, j] for i, j in zip(fin_base, position)]
         x_ = xyz[0]
         y_ = xyz[1]
         z_ = xyz[2]
         ax.plot(x_, y_, z_, 'r--')  # XY plane
 
-        # Check each point is equal euclidian distance from fin origin
-        mag = ((x_[0]-x_[1])**2 + 
-               (y_[0]-y_[1])**2 + 
-               (z_[0]-z_[1])**2) ** 1/2
-        print(f'Distance of point {i} from fin origin: {round(mag, 4)}')
+        # # Check each point is equal euclidian distance from fin origin
+        # mag = ((x_[0]-x_[1])**2 + 
+        #        (y_[0]-y_[1])**2 + 
+        #        (z_[0]-z_[1])**2) ** (1/2)
+        # print(f'Distance of point {i} from fin origin: {round(mag, 4)}')
+        
+        mag = ((fin_base[0]-position[0])**2 + 
+               (fin_base[1]-position[1])**2 + 
+               (fin_base[2]-position[2])**2) ** (1/2)
+        print(f'Distance of point {i} from fin origin: {round(mag, 2)} must equal ')
 
     # plt.show()
 
@@ -158,7 +169,7 @@ def transformation_matrix(beta, a, gamma, theta):
     """
     Build A_i = Ry(beta) @ Tx(a) @ Ry(gamma) @ Rz(theta) 
     where:
-      - Ry(beta) rotates about local Y, by fixed ray offset beta, to set new X axis,
+      - Ry(beta) rotates about local Y, by fixed offset beta, to set new X axis,
       - Tx(a) is translation in new X direction by link length a,
       - Ry(gamma) rotates about local Y, by fixed offset gamma, to set new Z axis
       - Rz(theta) is joint rotation about new Z by joint angle theta.
@@ -167,72 +178,112 @@ def transformation_matrix(beta, a, gamma, theta):
     """
     return Ry(beta) @ Tx(a) @ Ry(gamma) @ Rz(theta)
 
-def generate_transformation_params(b, a, g, inner_angle):
+def generate_transformation_params(beta, a, gamma, theta):
     """
     Generates the individual joint parameters to describe the fin folding 
     """
+    inner_angle = theta
     outer_angle = -inner_angle/2
 
-    return([(b, a, g, outer_angle),
-              (b, a, g, inner_angle),
-              (b, a, g, outer_angle),
-              (b, a, g, inner_angle),
-              (b, a, g, outer_angle),
-              (b, a, g, inner_angle),
-              (b, a, g, outer_angle),
-              (b, a, g, inner_angle),
+    # print(f"inner angle = {inner_angle}, outer angle = {outer_angle}")
+
+    return([  (beta, a, gamma, outer_angle),
+              (beta, a, gamma, inner_angle),
+              (beta, a, gamma, outer_angle),
+              (beta, a, gamma, inner_angle),
+              (beta, a, gamma, outer_angle),
+              (beta, a, gamma, inner_angle),
+              (beta, a, gamma, outer_angle),
+              (beta, a, gamma, inner_angle),
               ])
 
-# 3D cooridinates of the origin of the fin, calculated geometrically
-fin_origin = [0.39/2, 0, 0.98]
 
-# Chord length along each fin ray
-l = 0.39
+# Number of fin rays
+n_rays = 8
 
-# Angle of each chord, relative to previous
-c = -pi/16
+# Fin ray angle
+alpha = pi / n_rays
 
-# Angle of each z rotation axis, relative to previous
-g = -pi/16
+# Length of hinge from fin base to fin edge
+l = 1
 
-# Iterate through a series of states from fully open fin to fully folded
-for i, angle in enumerate(np.linspace(0, pi, 1)):
+# Height of fin ray
+h = l * cos(alpha/2)
+
+# Chord of fin ray (modelled as link length)
+a = 2 * l * sin(alpha/2)
+
+print(f"a = {a}, h = {h}")
+
+
+# 3D cooridinates of the fin base 
+# fin_base = [0.39/2, 0, 0.98]
+fin_base = [a/2, 0, h]
+print(f"fin_base = {fin_base}")
+fin_base.append(1)
+print(f"fin_base = {fin_base}")
+fin_base = np.array(fin_base)
+print(f"fin_base = {fin_base}")
+fin_base = Ry(-alpha/2) @ fin_base
+print(f"fin_base = {fin_base}")
+fin_base = fin_base[:3]
+print(f"fin_base = {fin_base}")
+
+
+
+
+
+
+
+# Offset angle of each fin ray relative to previous, for translation
+# beta = -pi/16
+beta = -alpha/2
+
+# Chord length of each fin ray edge (modelled as link length)
+# a = 0.39
+
+# Offset angle relative to translation axes, for joint rotation 
+# gamma = -pi/16
+gamma = -alpha/2
+
+# Iterate through a sequence of joint angles, from fully open fin, to fully folded
+for i, theta in enumerate(np.linspace(0, pi, 1)):
 
     # Parameters for transformation matrix: beta, a, gamma, theta
-    params = generate_transformation_params(c, l, g, angle)
+    params = generate_transformation_params(beta, a, gamma, theta)
 
     # Example: Fully opn fin (flat)
-    params = [(0, l, g, 0),
-              (c, l, g, 0),
-              (c, l, g, 0),
-              (c, l, g, 0),
-              (c, l, g, 0),
-              (c, l, g, 0),
-              (c, l, g, 0),
-              (c, l, g, 0),
-            ]
+    # params = [(beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #           (beta, a, gamma, 0),
+    #         ]
     
-    # Example: Partially folded fin (zig-zag) 
-    params = [(0, l, g, pi/4),
-              (c, l, g, -pi/4),
-              (c, l, g, pi/4),
-              (c, l, g, -pi/4),
-              (c, l, g, pi/4),
-              (c, l, g, -pi/4),
-              (c, l, g, pi/4),
-              (c, l, g, -pi/4),
-            ]
+    # # Example: Partially folded fin (zig-zag) 
+    # params = [(beta, a, gamma, pi/4),
+    #           (beta, a, gamma, -pi/4),
+    #           (beta, a, gamma, pi/4),
+    #           (beta, a, gamma, -pi/4),
+    #           (beta, a, gamma, pi/4),
+    #           (beta, a, gamma, -pi/4),
+    #           (beta, a, gamma, pi/4),
+    #           (beta, a, gamma, -pi/4),
+    #         ]
 
     # Example: Fully folded fin
-    params = [(0, l, g, -pi/2),
-              (c, l, g, pi),
-              (c, l, g, -pi/2),
-              (c, l, g, pi),
-              (c, l, g, -pi/2),
-              (c, l, g, pi),
-              (c, l, g, -pi/2),
-              (c, l, g, pi),
-            ]
+    # params = [(beta, a, gamma, -pi/2),
+    #           (beta, a, gamma, pi),
+    #           (beta, a, gamma, -pi/2),
+    #           (beta, a, gamma, pi),
+    #           (beta, a, gamma, -pi/2),
+    #           (beta, a, gamma, pi),
+    #           (beta, a, gamma, -pi/2),
+    #           (beta, a, gamma, pi),
+    #         ]
     
     # 4 x 4 identity matrix
     T = np.eye(4)
@@ -258,7 +309,7 @@ for i, angle in enumerate(np.linspace(0, pi, 1)):
     # Plot the fin
     plot_fin(positions, 
             rotations, 
-            fin_origin, 
+            fin_base, 
             scale=0.1)
 
     plt.savefig(f'fin_pose_{i}.png')
