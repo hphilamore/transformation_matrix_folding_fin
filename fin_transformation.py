@@ -7,7 +7,6 @@ Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
 
 TODO
-Fin magnitude bug 
 Update geometric parameters calculated automatically (including fold angle) when number of rays is changed
 Replace identity matrix with A0
 Double check matrix product is correct 
@@ -215,25 +214,13 @@ a = 2 * l * sin(alpha/2)
 
 print(f"a = {a}, h = {h}")
 
-
 # 3D cooridinates of the fin base 
-# fin_base = [0.39/2, 0, 0.98]
 fin_base = [a/2, 0, h]
-print(f"fin_base = {fin_base}")
 fin_base.append(1)
-print(f"fin_base = {fin_base}")
 fin_base = np.array(fin_base)
-print(f"fin_base = {fin_base}")
 fin_base = Ry(-alpha/2) @ fin_base
-print(f"fin_base = {fin_base}")
 fin_base = fin_base[:3]
 print(f"fin_base = {fin_base}")
-
-
-
-
-
-
 
 # Offset angle of each fin ray relative to previous, for translation
 # beta = -pi/16
@@ -247,7 +234,7 @@ beta = -alpha/2
 gamma = -alpha/2
 
 # Iterate through a sequence of joint angles, from fully open fin, to fully folded
-for i, theta in enumerate(np.linspace(0, pi, 1)):
+for i, theta in enumerate(np.linspace(0, pi, 10)):
 
     # Parameters for transformation matrix: beta, a, gamma, theta
     params = generate_transformation_params(beta, a, gamma, theta)
@@ -314,7 +301,6 @@ for i, theta in enumerate(np.linspace(0, pi, 1)):
 
     plt.savefig(f'fin_pose_{i}.png')
     plt.show()
-
 
 
 
