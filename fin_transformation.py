@@ -10,7 +10,7 @@ TODO
 Update geometric parameters calculated automatically (including fold angle) when number of rays is changed
 Replace identity matrix with A0
 Double check matrix product is correct 
-Diagram to explain model using standard variable names
+Computationally generated diagram to explain model using standard variable names and add to REDME
 """
 
 def plot_fin(positions, rotations, fin_base, scale=0.5):
