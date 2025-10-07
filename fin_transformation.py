@@ -7,7 +7,6 @@ Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
 
 TODO
-Folding to state 3
 Replace identity matrix with A0
 Add calculation of base coordinates to paper and diagram
 Model description with sketch in README 
@@ -25,11 +24,11 @@ Number of fin rays
 n_rays = 6
 
 """
-Division factor, where ray angle = pi/division factor 
+Shape factor, where ray angle = pi/fin_angle_factor 
 - can be greater than or equal to number of fin rays   
 - must be even number
 """
-division_factor = 8
+fin_angle_factor = 8
 
 """
 Spacing between each toe 
@@ -38,7 +37,7 @@ Choose one, comment out the other
 spacing = n_rays  # Equal spacing between each toe 
 
 # If division factor is greater, spacing used for this number of rays (smaller angle between toes)
-spacing = division_factor
+spacing = fin_angle_factor
 
 
 def plot_fin(positions, rotations, fin_base, scale=0.5):
@@ -208,25 +207,16 @@ def transformation_matrix(beta, a, gamma, theta):
 def generate_transformation_params(beta, a, gamma, theta, spacing):
     """
     Generates the individual joint parameters to describe the fin folding 
-    from State 1 (fully open) to State 2 (folded)
+    from State 1 (fully open), through State 2 (folded), to State 3 (fully folded)
     """
-    # # Set angles for inner and outer folds
-    # inner_angle = theta
-    # # outer_angle = -inner_angle * 1/2
-
-    # # Calculate outer angle to create equal spacing between fin rays  
-    # scale_factor = 1 - (4 / spacing)
-    # outer_angle = -inner_angle * scale_factor
-
-    # Set angles for inner and outer folds
+    # Set angle of outer folds
     outer_angle = theta
-    # outer_angle = -inner_angle * 1/2
 
-    # Calculate outer angle to create equal spacing between fin rays  
+    # Calculate angle of inner folds:  
     scale_factor = 1 - (4 / spacing)
     inner_angle = -outer_angle / scale_factor
-    print('inner angle =', inner_angle)
-    # if round(inner_angle, 5) == round(pi, 5):
+    
+    # Inner folds will reach fully folded state before outer, so stop inner folds at this point 
     if inner_angle <= -pi:
         inner_angle = -pi
 
@@ -243,7 +233,7 @@ def generate_transformation_params(beta, a, gamma, theta, spacing):
     return params
 
 # Fin ray angle
-ray_angle = 1/division_factor
+ray_angle = 1/fin_angle_factor
 
 # alpha = pi / n_rays
 alpha = pi * ray_angle
@@ -257,26 +247,21 @@ h = l * cos(alpha/2)
 # Chord of fin ray (modelled as link length)
 a = 2 * l * sin(alpha/2)
 
-print(f"a = {a}, h = {h}")
+# Offset angle of each fin ray relative to previous, for translation
+# beta = -pi/16
+beta = -alpha/2
 
-# 3D cooridinates of the fin base 
+# Offset angle relative to translation axes, for joint rotation 
+# gamma = -pi/16
+gamma = -alpha/2
+
+# Calculate 3D cooridinates of the fin base by rotating in the y axis
 fin_base = [a/2, 0, h]
 fin_base.append(1)
 fin_base = np.array(fin_base)
 fin_base = Ry(-alpha/2) @ fin_base
 fin_base = fin_base[:3]
 print(f"fin_base = {fin_base}")
-
-# Offset angle of each fin ray relative to previous, for translation
-# beta = -pi/16
-beta = -alpha/2
-
-# Chord length of each fin ray edge (modelled as link length)
-# a = 0.39
-
-# Offset angle relative to translation axes, for joint rotation 
-# gamma = -pi/16
-gamma = -alpha/2
 
 # Iterate through joint angles describing poses from fully open fin (State 1) to folded (State 2)
 for i, theta in enumerate(np.linspace(0, pi, 10)):
@@ -295,8 +280,8 @@ for i, theta in enumerate(np.linspace(0, pi, 10)):
     # params = [(beta, a, gamma, pi),
     #           (beta, a, gamma, -pi/2)] * int(n_rays/2)
     
-    # 4 x 4 identity matrix
-    T = np.eye(4)
+    # Transformation matrix of first joint in kinematic chain (4 x 4 identity matrix)
+    T = transformation_matrix(0, 0, 0, 0)
 
     # 3D vector representing position of the joint with respect to the inertial or base frame 
     positions = [T[:3,3].copy()]
