@@ -8,9 +8,11 @@ https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-ki
 
 TODO
 Update geometric parameters calculated automatically (including fold angle) when number of rays is changed
+Folding to state 3
 Replace identity matrix with A0
-Double check matrix product is correct 
-Computationally generated diagram to explain model using standard variable names and add to REDME
+Add calculation of base coordinates to paper and diagram
+Do the working to check matrix product is correct
+Model description with sketh in README 
 """
 
 def plot_fin(positions, rotations, fin_base, scale=0.5):
@@ -88,7 +90,7 @@ def plot_fin(positions, rotations, fin_base, scale=0.5):
         mag = ((fin_base[0]-position[0])**2 + 
                (fin_base[1]-position[1])**2 + 
                (fin_base[2]-position[2])**2) ** (1/2)
-        print(f'Distance of point {i} from fin origin: {round(mag, 2)} must equal ')
+        print(f'Distance of point {i} from fin origin: {round(mag, 2)}')
 
     # plt.show()
 
@@ -181,27 +183,32 @@ def generate_transformation_params(beta, a, gamma, theta):
     """
     Generates the individual joint parameters to describe the fin folding 
     """
+    # Set angles for inner and outer folds
     inner_angle = theta
     outer_angle = -inner_angle/2
 
-    # print(f"inner angle = {inner_angle}, outer angle = {outer_angle}")
+    # Joint parameters for first two joints
+    params = [(beta, a, gamma, outer_angle),
+              (beta, a, gamma, inner_angle)]
 
-    return([  (beta, a, gamma, outer_angle),
-              (beta, a, gamma, inner_angle),
-              (beta, a, gamma, outer_angle),
-              (beta, a, gamma, inner_angle),
-              (beta, a, gamma, outer_angle),
-              (beta, a, gamma, inner_angle),
-              (beta, a, gamma, outer_angle),
-              (beta, a, gamma, inner_angle),
-              ])
+    # Number of times to repeat to describe full fin
+    repeats = int(n_rays/2)
 
+    # Joint parameters for all joints
+    params = params * repeats
+    
+    return params
 
 # Number of fin rays
 n_rays = 8
 
+# Fin ray angle expressed as multiple of pi 
+ray_angle = 1/n_rays
+ray_angle = 1/8
+
 # Fin ray angle
-alpha = pi / n_rays
+# alpha = pi / n_rays
+alpha = pi * ray_angle
 
 # Length of hinge from fin base to fin edge
 l = 1
@@ -236,41 +243,19 @@ gamma = -alpha/2
 # Iterate through a sequence of joint angles, from fully open fin, to fully folded
 for i, theta in enumerate(np.linspace(0, pi, 10)):
 
-    # Parameters for transformation matrix: beta, a, gamma, theta
+    # Joint parameters for transformation matrix: beta, a, gamma, theta
     params = generate_transformation_params(beta, a, gamma, theta)
 
-    # Example: Fully opn fin (flat)
-    # params = [(beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #           (beta, a, gamma, 0),
-    #         ]
+    # # Example: Fully opn fin (flat)
+    # params = [(beta, a, gamma, 0)] * n_rays
     
     # # Example: Partially folded fin (zig-zag) 
     # params = [(beta, a, gamma, pi/4),
-    #           (beta, a, gamma, -pi/4),
-    #           (beta, a, gamma, pi/4),
-    #           (beta, a, gamma, -pi/4),
-    #           (beta, a, gamma, pi/4),
-    #           (beta, a, gamma, -pi/4),
-    #           (beta, a, gamma, pi/4),
-    #           (beta, a, gamma, -pi/4),
-    #         ]
+    #           (beta, a, gamma, -pi/4)] * int(n_rays/2)
 
-    # Example: Fully folded fin
+    # # Example: Fully folded fin
     # params = [(beta, a, gamma, -pi/2),
-    #           (beta, a, gamma, pi),
-    #           (beta, a, gamma, -pi/2),
-    #           (beta, a, gamma, pi),
-    #           (beta, a, gamma, -pi/2),
-    #           (beta, a, gamma, pi),
-    #           (beta, a, gamma, -pi/2),
-    #           (beta, a, gamma, pi),
-    #         ]
+    #           (beta, a, gamma, pi)] * int(n_rays/2)
     
     # 4 x 4 identity matrix
     T = np.eye(4)
