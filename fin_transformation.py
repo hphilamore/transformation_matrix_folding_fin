@@ -7,12 +7,11 @@ Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
 
 TODO
-Update geometric parameters calculated automatically (including fold angle) when number of rays is changed
 Folding to state 3
 Replace identity matrix with A0
 Add calculation of base coordinates to paper and diagram
+Model description with sketch in README 
 Do the working to check matrix product is correct
-Model description with sketh in README 
 """
 
 """
@@ -36,11 +35,10 @@ division_factor = 8
 Spacing between each toe 
 Choose one, comment out the other
 """
-# Equal spacing between each toe 
-spacing = n_rays   
+spacing = n_rays  # Equal spacing between each toe 
 
 # If division factor is greater, spacing used for this number of rays (smaller angle between toes)
-# spacing = division_factor
+spacing = division_factor
 
 
 def plot_fin(positions, rotations, fin_base, scale=0.5):
@@ -210,17 +208,27 @@ def transformation_matrix(beta, a, gamma, theta):
 def generate_transformation_params(beta, a, gamma, theta, spacing):
     """
     Generates the individual joint parameters to describe the fin folding 
+    from State 1 (fully open) to State 2 (folded)
     """
+    # # Set angles for inner and outer folds
+    # inner_angle = theta
+    # # outer_angle = -inner_angle * 1/2
+
+    # # Calculate outer angle to create equal spacing between fin rays  
+    # scale_factor = 1 - (4 / spacing)
+    # outer_angle = -inner_angle * scale_factor
+
     # Set angles for inner and outer folds
-    inner_angle = theta
-    outer_angle = -inner_angle * 1/2
+    outer_angle = theta
+    # outer_angle = -inner_angle * 1/2
 
     # Calculate outer angle to create equal spacing between fin rays  
-    scale_factor = 1 - (4 / n_rays)
-    scale_factor = 1 - (4 / (division_factor))
     scale_factor = 1 - (4 / spacing)
-    outer_angle = -inner_angle * scale_factor
-
+    inner_angle = -outer_angle / scale_factor
+    print('inner angle =', inner_angle)
+    # if round(inner_angle, 5) == round(pi, 5):
+    if inner_angle <= -pi:
+        inner_angle = -pi
 
     # Joint parameters for first two joints
     params = [(beta, a, gamma, inner_angle),
@@ -233,38 +241,6 @@ def generate_transformation_params(beta, a, gamma, theta, spacing):
     params = params * repeats
     
     return params
-
-
-# """
-# Number of fin rays
-# (Must be even number)
-# """
-# n_rays = 6
-
-# """
-# Size of each ray as multiple of pi
-# Division factor:
-# - can be greater than or equal to number of fin rays   
-# - must be even number
-# """
-# division_factor = 6
-
-# # Fin ray angle
-# ray_angle = 1/ray_division_factor
-
-
-# """
-# Spacing between each toe 
-# Choose one, comment out the other
-# """
-# # Equal spacing between each toe 
-# spacing = n_rays   
-
-# # If division factor is greater, spacing used for this number of rays (smaller angle between toes)
-# spacing = division_factor
-
-
-
 
 # Fin ray angle
 ray_angle = 1/division_factor
@@ -302,7 +278,7 @@ beta = -alpha/2
 # gamma = -pi/16
 gamma = -alpha/2
 
-# Iterate through a sequence of joint angles, from fully open fin, to fully folded
+# Iterate through joint angles describing poses from fully open fin (State 1) to folded (State 2)
 for i, theta in enumerate(np.linspace(0, pi, 10)):
 
     # Joint parameters for transformation matrix: beta, a, gamma, theta
