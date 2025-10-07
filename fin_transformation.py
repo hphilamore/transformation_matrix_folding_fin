@@ -15,6 +15,34 @@ Do the working to check matrix product is correct
 Model description with sketh in README 
 """
 
+"""
+------- INPUT PARAMETERS --------
+"""
+
+"""
+Number of fin rays
+(Must be even number)
+"""
+n_rays = 6
+
+"""
+Division factor, where ray angle = pi/division factor 
+- can be greater than or equal to number of fin rays   
+- must be even number
+"""
+division_factor = 8
+
+"""
+Spacing between each toe 
+Choose one, comment out the other
+"""
+# Equal spacing between each toe 
+spacing = n_rays   
+
+# If division factor is greater, spacing used for this number of rays (smaller angle between toes)
+# spacing = division_factor
+
+
 def plot_fin(positions, rotations, fin_base, scale=0.5):
 
     """
@@ -66,9 +94,9 @@ def plot_fin(positions, rotations, fin_base, scale=0.5):
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.set_xlim(0, 1.5)
-    ax.set_ylim(0, 1.5)
-    ax.set_zlim(0, 1.5)
+    ax.set_xlim(-0.5, 1.5)
+    ax.set_ylim(-0.5, 1.5)
+    ax.set_zlim(-0.5, 1.5)
 
     # Plot wireframe by connecting joints to fin origin
     print(f'Check each point is equal distance from fin origin and equal to hinge length l={l}:')
@@ -179,17 +207,24 @@ def transformation_matrix(beta, a, gamma, theta):
     """
     return Ry(beta) @ Tx(a) @ Ry(gamma) @ Rz(theta)
 
-def generate_transformation_params(beta, a, gamma, theta):
+def generate_transformation_params(beta, a, gamma, theta, spacing):
     """
     Generates the individual joint parameters to describe the fin folding 
     """
     # Set angles for inner and outer folds
     inner_angle = theta
-    outer_angle = -inner_angle/2
+    outer_angle = -inner_angle * 1/2
+
+    # Calculate outer angle to create equal spacing between fin rays  
+    scale_factor = 1 - (4 / n_rays)
+    scale_factor = 1 - (4 / (division_factor))
+    scale_factor = 1 - (4 / spacing)
+    outer_angle = -inner_angle * scale_factor
+
 
     # Joint parameters for first two joints
-    params = [(beta, a, gamma, outer_angle),
-              (beta, a, gamma, inner_angle)]
+    params = [(beta, a, gamma, inner_angle),
+              (beta, a, gamma, outer_angle)]
 
     # Number of times to repeat to describe full fin
     repeats = int(n_rays/2)
@@ -199,14 +234,41 @@ def generate_transformation_params(beta, a, gamma, theta):
     
     return params
 
-# Number of fin rays
-n_rays = 8
 
-# Fin ray angle expressed as multiple of pi 
-ray_angle = 1/n_rays
-ray_angle = 1/8
+# """
+# Number of fin rays
+# (Must be even number)
+# """
+# n_rays = 6
+
+# """
+# Size of each ray as multiple of pi
+# Division factor:
+# - can be greater than or equal to number of fin rays   
+# - must be even number
+# """
+# division_factor = 6
+
+# # Fin ray angle
+# ray_angle = 1/ray_division_factor
+
+
+# """
+# Spacing between each toe 
+# Choose one, comment out the other
+# """
+# # Equal spacing between each toe 
+# spacing = n_rays   
+
+# # If division factor is greater, spacing used for this number of rays (smaller angle between toes)
+# spacing = division_factor
+
+
+
 
 # Fin ray angle
+ray_angle = 1/division_factor
+
 # alpha = pi / n_rays
 alpha = pi * ray_angle
 
@@ -244,7 +306,7 @@ gamma = -alpha/2
 for i, theta in enumerate(np.linspace(0, pi, 10)):
 
     # Joint parameters for transformation matrix: beta, a, gamma, theta
-    params = generate_transformation_params(beta, a, gamma, theta)
+    params = generate_transformation_params(beta, a, gamma, theta, spacing)
 
     # # Example: Fully opn fin (flat)
     # params = [(beta, a, gamma, 0)] * n_rays
@@ -254,8 +316,8 @@ for i, theta in enumerate(np.linspace(0, pi, 10)):
     #           (beta, a, gamma, -pi/4)] * int(n_rays/2)
 
     # # Example: Fully folded fin
-    # params = [(beta, a, gamma, -pi/2),
-    #           (beta, a, gamma, pi)] * int(n_rays/2)
+    # params = [(beta, a, gamma, pi),
+    #           (beta, a, gamma, -pi/2)] * int(n_rays/2)
     
     # 4 x 4 identity matrix
     T = np.eye(4)
