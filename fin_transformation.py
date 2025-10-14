@@ -7,8 +7,6 @@ Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
 
 TODO
-Replace identity matrix with A0
-Add calculation of base coordinates to paper and diagram
 Model description with sketch in README 
 Do the working to check matrix product is correct
 """
@@ -237,27 +235,14 @@ alpha = pi * ray_angle
 # Length of hinge from fin base to fin edge
 l = 1
 
-# Height of fin ray
-h = l * cos(alpha/2)
-
 # Chord of fin ray (modelled as link length)
 a = 2 * l * sin(alpha/2)
 
 # Offset angle of each fin ray relative to previous, for translation
-# beta = -pi/16
 beta = -alpha/2
 
 # Offset angle relative to translation axes, for joint rotation 
-# gamma = -pi/16
 gamma = -alpha/2
-
-# Calculate 3D cooridinates of the fin base by rotating in the y axis
-# fin_base = [a/2, 0, h]
-# fin_base.append(1)
-# fin_base = np.array(fin_base)
-# fin_base = Ry(-alpha/2) @ fin_base
-# fin_base = fin_base[:3]
-# print(f"fin_base = {fin_base}")
 
 # Iterate through joint angles describing poses from fully open fin (State 1) to folded (State 2)
 for i, theta in enumerate(np.linspace(0, pi, 10)):
@@ -286,7 +271,7 @@ for i, theta in enumerate(np.linspace(0, pi, 10)):
     rotations = [T[:3,:3].copy()] 
 
     # Cooridnates of fin base with respect to the inertial or base frame
-    fin_base = [[0.0, 0.0, 1.0]] 
+    fin_base = [[0.0, 0.0, l]] 
 
     # Apply the trasformation to each joint on the fin
     for (beta, a, gamma, theta) in params:
