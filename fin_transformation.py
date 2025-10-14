@@ -40,12 +40,13 @@ spacing = n_rays  # Equal spacing between each toe
 spacing = fin_angle_factor
 
 
-def plot_fin(positions, rotations, fin_base, scale=0.5):
+def plot_fin(positions, rotations, 
+             fin_base, scale=0.5):
 
     """
     Plots a 3D scatter plot with folding points (joints) along the fin edge connected by a line.
     The local coordinate axes are shown at each joint.
-    The points are all connected to a single origin to create a wrireframe of a folded surface.
+    The points are all connected to a single q to create a wrireframe of a folded surface.
 
     Parameters
     ----------
@@ -73,20 +74,20 @@ def plot_fin(positions, rotations, fin_base, scale=0.5):
     # ax.plot(0, y, z, 'c--')  # YZ plane
 
     # Plot local axes at each joint
-    for origin, R in zip(positions, rotations):
+    for p, R in zip(positions, rotations):
         # Local axes
         x_vec = R[:,0]*scale
         y_vec = R[:,1]*scale
         z_vec = R[:,2]*scale
 
-        ax.quiver(*origin, *x_vec, color='r', linewidth=1)
-        ax.quiver(*origin, *y_vec, color='g', linewidth=1)
-        ax.quiver(*origin, *z_vec, color='b', linewidth=1)
+        ax.quiver(*p, *x_vec, color='r', linewidth=1)
+        ax.quiver(*p, *y_vec, color='g', linewidth=1)
+        ax.quiver(*p, *z_vec, color='b', linewidth=1)
 
         # Label local axes
-        ax.text(*(origin + x_vec), 'x', color='r', fontsize=10)
-        ax.text(*(origin + y_vec), 'y', color='g', fontsize=10)
-        ax.text(*(origin + z_vec), 'z', color='b', fontsize=10)
+        ax.text(*(p + x_vec), 'x', color='r', fontsize=10)
+        ax.text(*(p + y_vec), 'y', color='g', fontsize=10)
+        ax.text(*(p + z_vec), 'z', color='b', fontsize=10)
 
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
@@ -95,27 +96,22 @@ def plot_fin(positions, rotations, fin_base, scale=0.5):
     ax.set_ylim(-0.5, 1.5)
     ax.set_zlim(-0.5, 1.5)
 
-    # Plot wireframe by connecting joints to fin origin
-    print(f'Check each point is equal distance from fin origin and equal to hinge length l={l}:')
-    for i, position in enumerate(positions):
+    # Plot wireframe by connecting joints to fin q
+    print(f'Check each point is equal distance from fin q and equal to hinge length l={l}:')
+    # for i, position in enumerate(positions):
+    for i, (p, fb) in enumerate(zip(positions, fin_base)):
 
         # Get pairs of x, y and z coordinates to connect fin base to position 
-        xyz = [[i, j] for i, j in zip(fin_base, position)]
-        x_ = xyz[0]
-        y_ = xyz[1]
-        z_ = xyz[2]
+        x_ = [fb[0], p[0]] 
+        y_ = [fb[1], p[1]]
+        z_ = [fb[2], p[2]]
         ax.plot(x_, y_, z_, 'r--')  # XY plane
 
-        # # Check each point is equal euclidian distance from fin origin
-        # mag = ((x_[0]-x_[1])**2 + 
-        #        (y_[0]-y_[1])**2 + 
-        #        (z_[0]-z_[1])**2) ** (1/2)
-        # print(f'Distance of point {i} from fin origin: {round(mag, 4)}')
-        
-        mag = ((fin_base[0]-position[0])**2 + 
-               (fin_base[1]-position[1])**2 + 
-               (fin_base[2]-position[2])**2) ** (1/2)
-        print(f'Distance of point {i} from fin origin: {round(mag, 2)}')
+        # # Check each point is equal euclidian distance from fin base
+        mag = ((fb[0]-p[0])**2 + 
+               (fb[1]-p[1])**2 + 
+               (fb[2]-p[2])**2) ** (1/2)
+        print(f'Distance of joint {i} from fin base: {round(mag, 2)}')
 
     # plt.show()
 
@@ -256,12 +252,12 @@ beta = -alpha/2
 gamma = -alpha/2
 
 # Calculate 3D cooridinates of the fin base by rotating in the y axis
-fin_base = [a/2, 0, h]
-fin_base.append(1)
-fin_base = np.array(fin_base)
-fin_base = Ry(-alpha/2) @ fin_base
-fin_base = fin_base[:3]
-print(f"fin_base = {fin_base}")
+# fin_base = [a/2, 0, h]
+# fin_base.append(1)
+# fin_base = np.array(fin_base)
+# fin_base = Ry(-alpha/2) @ fin_base
+# fin_base = fin_base[:3]
+# print(f"fin_base = {fin_base}")
 
 # Iterate through joint angles describing poses from fully open fin (State 1) to folded (State 2)
 for i, theta in enumerate(np.linspace(0, pi, 10)):
@@ -287,13 +283,20 @@ for i, theta in enumerate(np.linspace(0, pi, 10)):
     positions = [T[:3,3].copy()]
 
     # 3 x 3 matrix describing orientation of the joint with respect to the inertial or base frame
-    rotations = [T[:3,:3].copy()]  
+    rotations = [T[:3,:3].copy()] 
+
+    # Cooridnates of fin base with respect to the inertial or base frame
+    fin_base = [[0.0, 0.0, 1.0]] 
 
     # Apply the trasformation to each joint on the fin
     for (beta, a, gamma, theta) in params:
 
         # Update matrix T, the transform from base frame (frame 0) to frame i
         T = T @ transformation_matrix(beta, a, gamma, theta)
+
+        # Coordinates of the fin base
+        fb = T.copy() @ Tz(1)
+        fin_base.append(fb[:3, 3])
 
         # Update the 3D position vector
         positions.append(T[:3,3].copy())
@@ -304,7 +307,7 @@ for i, theta in enumerate(np.linspace(0, pi, 10)):
     # Plot the fin
     plot_fin(positions, 
             rotations, 
-            fin_base, 
+            fin_base,
             scale=0.1)
 
     plt.savefig(f'fin_pose_{i}.png')
