@@ -23,8 +23,8 @@ $$
 R_x(\phi_i) =
 \begin{bmatrix}
 1 & 0 & 0 & 0 \\
-0 & \cos\phi_i & -\sin\phi_i & 0 \\
-0 & \sin\phi_i & \cos\phi_i & 0 \\
+0 & \cos\lambda_i & -\sin\lambda_i & 0 \\
+0 & \sin\lambda_i & \cos\lambda_i & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 $$
