@@ -5,10 +5,6 @@ import matplotlib.pyplot as plt
 """
 Theory taken from: FORWARD KINEMATICS: THE DENAVIT-HARTENBERG CONVENTION
 https://users.cs.duke.edu/~brd/Teaching/Bio/asmb/current/Papers/chap3-forward-kinematics.pdf
-
-TODO
-Model description with sketch in README 
-Do the working to check matrix product is correct
 """
 
 """
