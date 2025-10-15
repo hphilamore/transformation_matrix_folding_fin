@@ -2,7 +2,7 @@
 # A model of the fin folding kinematics. 
 
 <p align="center">
-  <img src="./robosoft_paper_diagram_v1.png" alt="Fin folding kinematics diagram" width="500"/>
+  <img src="./robosoft_paper_diagram_v1.png" alt="Fin folding kinematics diagram" width="300"/>
 </p>
 
 - The profile of each fin ray was represented as an isosceles triangle with the smallest angle $\alpha$ and the shortest side length $a$. 
