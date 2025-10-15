@@ -13,7 +13,7 @@ A 3D homogeneous transformation matrix $A^i_{i+1}$, is used to compute the posit
 
 The transformation matrix $A^i_{i+1}$ is the product of four basic transformations: First, $R_y(\beta)$ rotates the coordinate axes $x,z$ by angle $\beta= \frac{\alpha}{2}$; then $Tx(a)$ then translates axes $x', z'$ by length $a$; next $R_y(\gamma)$ rotates coordinate axes $x'',z''$ by angle $\gamma= \frac{\alpha}{2}$; finally $R_z(\theta)$ rotates coordinate axes $x''',y'''$ about $z'''$ by joint angle $\theta$. 
 
-$
+$$
 \[
 R_x(\alpha_i) =
 \begin{bmatrix}
@@ -23,26 +23,26 @@ R_x(\alpha_i) =
 0 & 0 & 0 & 1
 \end{bmatrix}
 \]
-$
+$$
 
-\begin{equation}
-\adjustbox{max width=7.8cm}{$
+$$
 \begin{aligned}
-A^i_{i+1} & = R_{y}(\beta)  T_{x}(d) R_{y}(\gamma) R_{z}(\theta) \\
-& = \begin{bmatrix}
-R^i_{i+1} & \mathbf{p}^i_{i+1} \\
+A^i_{i+1} &= R_{y}(\beta)\, T_{x}(a)\, R_{y}(\gamma)\, R_{z}(\theta) \\[6pt]
+&= 
+\begin{bmatrix}
+R^i_{i+1} & \mathbf{p}^i_{i+1} \\[3pt]
 0 & 1
-\end{bmatrix} \\
-& = \begin{bmatrix}
-c\theta c(\beta+\gamma) & s\theta c(\beta+\gamma) & s(\beta+\gamma) & a c\beta\\[6pt]
-s \theta & c\theta & 0 & 0\\[6pt]
--s(\beta+\gamma)c \theta & s \theta s(\beta+\gamma) & c(\beta+\gamma) & -as \beta\\[6pt]
+\end{bmatrix} \\[8pt]
+&=
+\begin{bmatrix}
+\cos\theta\,\cos(\beta+\gamma) & -\sin\theta\,\cos(\beta+\gamma) & \sin(\beta+\gamma) & a\cos\beta \\[6pt]
+\sin\theta & \cos\theta & 0 & 0 \\[6pt]
+-\cos\theta\,\sin(\beta+\gamma) & \sin\theta\,\sin(\beta+\gamma) & \cos(\beta+\gamma) & -a\sin\beta \\[6pt]
 0 & 0 & 0 & 1
 \end{bmatrix}
 \end{aligned}
-$}
-\label{eq:transformation_matrix}
-\end{equation}
+$$
+
 
 where $s=\sin$ and $c=\cos$. 
 
