@@ -13,6 +13,18 @@ A 3D homogeneous transformation matrix $A^i_{i+1}$, is used to compute the posit
 
 The transformation matrix $A^i_{i+1}$ is the product of four basic transformations: First, $R_y(\beta)$ rotates the coordinate axes $x,z$ by angle $\beta= \frac{\alpha}{2}$; then $Tx(a)$ then translates axes $x', z'$ by length $a$; next $R_y(\gamma)$ rotates coordinate axes $x'',z''$ by angle $\gamma= \frac{\alpha}{2}$; finally $R_z(\theta)$ rotates coordinate axes $x''',y'''$ about $z'''$ by joint angle $\theta$. 
 
+$
+\[
+R_x(\alpha_i) =
+\begin{bmatrix}
+1 & 0 & 0 & 0 \\[6pt]
+0 & \cos\alpha_i & -\sin\alpha_i & 0 \\[6pt]
+0 & \sin\alpha_i & \cos\alpha_i & 0 \\[6pt]
+0 & 0 & 0 & 1
+\end{bmatrix}
+\]
+$
+
 \begin{equation}
 \adjustbox{max width=7.8cm}{$
 \begin{aligned}
