@@ -17,9 +17,9 @@ $$
 \[
 R_x(\alpha_i) =
 \begin{bmatrix}
-1 & 0 & 0 & 0 \\[6pt]
-0 & \cos\alpha_i & -\sin\alpha_i & 0 \\[6pt]
-0 & \sin\alpha_i & \cos\alpha_i & 0 \\[6pt]
+1 & 0 & 0 & 0 \\
+0 & \cos\alpha_i & -\sin\alpha_i & 0 \\
+0 & \sin\alpha_i & \cos\alpha_i & 0 \\
 0 & 0 & 0 & 1
 \end{bmatrix}
 \]
@@ -27,12 +27,12 @@ $$
 
 $$
 \begin{aligned}
-A^i_{i+1} &= R_{y}(\beta)\, T_{x}(a)\, R_{y}(\gamma)\, R_{z}(\theta) \\[6pt]
+A^i_{i+1} &= R_{y}(\beta)\, T_{x}(a)\, R_{y}(\gamma)\, R_{z}(\theta) \\
 &= 
 \begin{bmatrix}
-R^i_{i+1} & \mathbf{p}^i_{i+1} \\[3pt]
+R^i_{i+1} & \mathbf{p}^i_{i+1} \\
 0 & 1
-\end{bmatrix} \\[8pt]
+\end{bmatrix} \\
 &=
 \begin{bmatrix}
 \cos\theta\,\cos(\beta+\gamma) & -\sin\theta\,\cos(\beta+\gamma) & \sin(\beta+\gamma) & a\cos\beta \\[6pt]
