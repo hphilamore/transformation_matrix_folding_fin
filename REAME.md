@@ -5,11 +5,11 @@
 
 - Each hinge, $i$ was represented as a revolute joint, $q_i$. 
 
-The axis of rotation of each joint $q_i$ is aligned with the rotation axis of hinge $i$, and the position of $q_i$ is on the fin edge, distal to the fin base, $b$. 
+- The axis of rotation of each joint $q_i$ is aligned with the rotation axis of hinge $i$, and the position of $q_i$ is on the fin edge, distal to the fin base, $b$. 
 
-The joints $q$, are connected in series by rigid links of length $a$. 
+- The joints $q$, are connected in series by rigid links of length $a$. 
 
-The $z$ axis of the base reference frame is aligned with the axis of rotation of $q_i$, and the $x$ axis is parallel to the face of the fin ray connecting hinges $q_i$ and $q_{i+1}$. 
+- The $z$ axis of the base reference frame is aligned with the axis of rotation of $q_i$, and the $x$ axis is parallel to the face of the fin ray connecting hinges $q_i$ and $q_{i+1}$. 
 
 A 3D homogeneous transformation matrix $A^i_{i+1}$, is used to compute the position and orientation of $q_{i+1}$ with respect to the previous hinge $q_i$, denoted by a three-vector $\mathbf{p}^i_{i+1}$ (coordinates $q_{i+1}$ with respect to $q_{i}$) and a 3 × 3 rotation matrix $R^i_{i+1}$. 
 
