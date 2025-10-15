@@ -18,7 +18,7 @@
 
 A 3D homogeneous transformation matrix $A^i_{i+1}$, is used to compute the position and orientation of $q_{i+1}$ with respect to the previous hinge $q_i$, denoted by a three-vector $\mathbf{p}^i_{i+1}$ (coordinates $q_{i+1}$ with respect to $q_{i}$) and a 3 × 3 rotation matrix $R^i_{i+1}$. 
 
-The transformation matrix $A^i_{i+1}$ is the product of four basic transformations: First, $R_y(\beta)$ rotates the coordinate axes $x,z$ by angle $\beta= \frac{\alpha}{2}$; then $Tx(a)$ then translates axes $x', z'$ by length $a$; next $R_y(\gamma)$ rotates coordinate axes $x'',z''$ by angle $\gamma= \frac{\alpha}{2}$; finally $R_z(\theta)$ rotates coordinate axes $x''',y'''$ about $z'''$ by joint angle $\theta$. 
+The transformation matrix $A^i_{i+1}$ is the product of four basic transformations: First, $R_y(\beta)$ rotates the coordinate axes $x,z$ by angle $\beta= \frac{\alpha}{2}$; then $Tx(a)$ then translates axes $x', z'$ by length $a$; next $R_y(\gamma)$ rotates coordinate axes $x'',z''$ by angle $\gamma= \frac{\alpha}{2}$; finally $R_z(\theta)$ rotates coordinate axes $x''',y'''$ about $z'''$ by joint angle $\theta$, where $\theta$ = $\pi - \phi$ radians. 
 
 $$
 R_x(\phi_i) =
