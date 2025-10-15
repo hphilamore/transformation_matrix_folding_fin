@@ -95,6 +95,7 @@ $$
 
 
 It follows that the position and orientation of any hinge $j$, with respect to hinge $i$ can be found by: 
+
 $$
 A^i_{j} = A^i_{i+1} A^{i+1}_{i+2}  A^{j-2}_{j-1} A^{j-1}_{j}
 $$
